@@ -1,94 +1,52 @@
-# Obsidian Sample Plugin
+# Obsidian Anki Sync
 
-This is a sample plugin for Obsidian (https://obsidian.md).
+基于 [AnkiConnect](https://foosoft.net/projects/anki-connect/) 的 Obsidian 闪卡同步插件。插件会扫描当前打开的笔记，提取带有特定标识的内容，并生成 Anki Basic 类型的卡片。同步时会按照笔记所在的文件夹层级自动创建子牌组，并在卡片中加入面包屑路径和快速跳转回 Obsidian 的链接。
 
-This project uses TypeScript to provide type checking and documentation.
-The repo depends on the latest plugin API (obsidian.d.ts) in TypeScript Definition format, which contains TSDoc comments describing what it does.
+## 功能特性
 
-This sample plugin demonstrates some of the basic functionality the plugin API can do.
-- Adds a ribbon icon, which shows a Notice when clicked.
-- Adds a command "Open Sample Modal" which opens a Modal.
-- Adds a plugin setting tab to the settings page.
-- Registers a global click event and output 'click' to the console.
-- Registers a global interval which logs 'setInterval' to the console.
+- 自定义闪卡标识，通过注释块（例如 `<!--ANKI-START-->`）编写卡片内容。
+- 依照笔记所在目录结构自动生成牌组名称，可在设置中指定顶层牌组。
+- 在 Anki 卡片顶部显示笔记所在位置的面包屑路径。
+- 卡片正面自动包含一个跳转回对应笔记行的 `obsidian://` 链接。
+- 记住已同步的卡片并在修改后更新，而不是重复创建。
 
-## First time developing plugins?
+## 闪卡书写格式
 
-Quick starting guide for new plugin devs:
+1. 在插件设置中设定闪卡标识（默认 `ANKI`）。
+2. 在笔记中使用以下结构编写卡片：
 
-- Check if [someone already developed a plugin for what you want](https://obsidian.md/plugins)! There might be an existing plugin similar enough that you can partner up with.
-- Make a copy of this repo as a template with the "Use this template" button (login to GitHub if you don't see it).
-- Clone your repo to a local development folder. For convenience, you can place this folder in your `.obsidian/plugins/your-plugin-name` folder.
-- Install NodeJS, then run `npm i` in the command line under your repo folder.
-- Run `npm run dev` to compile your plugin from `main.ts` to `main.js`.
-- Make changes to `main.ts` (or create new `.ts` files). Those changes should be automatically compiled into `main.js`.
-- Reload Obsidian to load the new version of your plugin.
-- Enable plugin in settings window.
-- For updates to the Obsidian API run `npm update` in the command line under your repo folder.
+   ```markdown
+   <!--ANKI-START-->
+   光合作用的主要器官？
+   <!--ANKI-BACK-->
+   叶片
+   <!--ANKI-END-->
+   ```
 
-## Releasing new releases
+   如果自定义了标识，例如填写 `BIO`, 则应写作 `<!--BIO-START-->`/`<!--BIO-BACK-->`/`<!--BIO-END-->`。
 
-- Update your `manifest.json` with your new version number, such as `1.0.1`, and the minimum Obsidian version required for your latest release.
-- Update your `versions.json` file with `"new-plugin-version": "minimum-obsidian-version"` so older versions of Obsidian can download an older version of your plugin that's compatible.
-- Create new GitHub release using your new version number as the "Tag version". Use the exact version number, don't include a prefix `v`. See here for an example: https://github.com/obsidianmd/obsidian-sample-plugin/releases
-- Upload the files `manifest.json`, `main.js`, `styles.css` as binary attachments. Note: The manifest.json file must be in two places, first the root path of your repository and also in the release.
-- Publish the release.
+3. 可在一个文件中编写多张卡片，插件会依次提取并同步。
 
-> You can simplify the version bump process by running `npm version patch`, `npm version minor` or `npm version major` after updating `minAppVersion` manually in `manifest.json`.
-> The command will bump version in `manifest.json` and `package.json`, and add the entry for the new version to `versions.json`
+## 使用方法
 
-## Adding your plugin to the community plugin list
+1. 在桌面端启动 Anki，并确保已安装并启用 AnkiConnect 插件。
+2. 在 Obsidian 中安装并启用本插件。
+3. 打开包含闪卡的 Markdown 文件。
+4. 通过命令面板执行「同步当前笔记到 Anki」，或为该命令绑定快捷键。
+5. 同步完成后可在 Anki 中查看生成的卡片。
 
-- Check the [plugin guidelines](https://docs.obsidian.md/Plugins/Releasing/Plugin+guidelines).
-- Publish an initial version.
-- Make sure you have a `README.md` file in the root of your repo.
-- Make a pull request at https://github.com/obsidianmd/obsidian-releases to add your plugin.
+## 插件设置
 
-## How to use
+- **闪卡标识：** 生成注释标记时使用的关键字，默认 `ANKI`。
+- **顶层牌组名称：** 同步时创建的根牌组名称，子牌组会按照文件夹层级自动生成。
+- **AnkiConnect 地址：** AnkiConnect 服务的访问地址，默认 `http://127.0.0.1:8765`。
 
-- Clone this repo.
-- Make sure your NodeJS is at least v16 (`node --version`).
-- `npm i` or `yarn` to install dependencies.
-- `npm run dev` to start compilation in watch mode.
+## 开发与构建
 
-## Manually installing the plugin
-
-- Copy over `main.js`, `styles.css`, `manifest.json` to your vault `VaultFolder/.obsidian/plugins/your-plugin-id/`.
-
-## Improve code quality with eslint (optional)
-- [ESLint](https://eslint.org/) is a tool that analyzes your code to quickly find problems. You can run ESLint against your plugin to find common bugs and ways to improve your code. 
-- To use eslint with this project, make sure to install eslint from terminal:
-  - `npm install -g eslint`
-- To use eslint to analyze this project use this command:
-  - `eslint main.ts`
-  - eslint will then create a report with suggestions for code improvement by file and line number.
-- If your source code is in a folder, such as `src`, you can use eslint with this command to analyze all files in that folder:
-  - `eslint ./src/`
-
-## Funding URL
-
-You can include funding URLs where people who use your plugin can financially support it.
-
-The simple way is to set the `fundingUrl` field to your link in your `manifest.json` file:
-
-```json
-{
-    "fundingUrl": "https://buymeacoffee.com"
-}
+```bash
+npm install
+npm run dev   # 开发模式
+npm run build # 生成生产版本
 ```
 
-If you have multiple URLs, you can also do:
-
-```json
-{
-    "fundingUrl": {
-        "Buy Me a Coffee": "https://buymeacoffee.com",
-        "GitHub Sponsor": "https://github.com/sponsors",
-        "Patreon": "https://www.patreon.com/"
-    }
-}
-```
-
-## API Documentation
-
-See https://github.com/obsidianmd/obsidian-api
+构建完成后，将 `manifest.json`、`main.js` 与（如果有的话）`styles.css` 复制到 `<Vault>/.obsidian/plugins/obsidian-anki-sync/` 目录即可在 Obsidian 中手动安装。
